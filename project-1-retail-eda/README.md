@@ -21,6 +21,10 @@ Exploratory data analysis of 9,994 retail orders from a US-based superstore (201
 - **Discounts above 40%** consistently generate losses — weak negative correlation of -0.22 - there are other factors at play
 - **Q4 seasonality** is clear and predictable every year
 
+## Preview
+
+![Discount vs Profit](discount_profit.png)
+
 ## Tools Used
 
 - Python (pandas, matplotlib, seaborn)
