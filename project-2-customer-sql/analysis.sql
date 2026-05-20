@@ -47,3 +47,4 @@ SELECT
 FROM orders
 GROUP BY region, category
 ORDER BY profit_margin ASC;
+
