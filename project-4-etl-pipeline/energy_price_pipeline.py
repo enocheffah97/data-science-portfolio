@@ -4,6 +4,10 @@ from datetime import datetime
 import requests
 import pandas as pd
 import os
+from dotenv import load_dotenv
+load_dotenv(os.path.expanduser('~/projects/project-4-etl-pipeline/.env'))
+
+EIA_API_KEY = os.environ.get('EIA_API_KEY', '')
 
 dag = DAG(
     'energy_price_pipeline',
@@ -21,11 +25,12 @@ CLEAN_PATH = os.path.expanduser(
 
 def extract():
     print("Extracting EIA energy price data...")
-    url = "https://api.eia.gov/v2/electricity/retail-sales/data/?api_key=k9Dk9q0FhrdjeWRTelPcIJ92TWoMKl2CBmQMHV0l&data[]=price&facets[sectorid][]=RES&sort[0][column]=period&sort[0][direction]=desc&length=100"
+    url = f"https://api.eia.gov/v2/electricity/retail-sales/data/?api_key={EIA_API_KEY}&data[]=price&facets[sectorid][]=RES&sort[0][column]=period&sort[0][direction]=desc&length=100"
     response = requests.get(url)
     data = response.json()
     records = data['response']['data']
     df = pd.DataFrame(records)
+    df['extracted_at'] = pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')
     df.to_csv(RAW_PATH, index=False)
     print(f"Extracted {len(df)} records saved to {RAW_PATH}")
 
@@ -33,7 +38,8 @@ def extract():
 def transform():
     print("Transforming data...")
     df = pd.read_csv(RAW_PATH)
-    df = df[['period', 'stateid', 'stateDescription', 'price', 'price-units']]
+    df = df[['period', 'stateid', 'stateDescription',
+             'price', 'price-units', 'extracted_at']]
     df = df.rename(columns={
         'period': 'month',
         'stateid': 'state_code',
@@ -55,6 +61,7 @@ def analyze():
     print("\n=== US RESIDENTIAL ELECTRICITY PRICE ANALYSIS ===")
     print(f"Total records: {len(df)}")
     print(f"Date range: {df['month'].min()} to {df['month'].max()}")
+    print(f"Extracted at: {df['extracted_at'].iloc[0]}")
     latest = df[df['month'] == df['month'].max()]
     print(f"\nTop 5 most expensive states:")
     top5 = latest.nlargest(5, 'avg_price_cents_kwh')[
