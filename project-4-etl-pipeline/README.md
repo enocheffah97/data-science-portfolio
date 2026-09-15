@@ -11,7 +11,7 @@ across all 50 states. Scheduled monthly with Apache Airflow on WSL2.
 ## Business Context
 
 Tesla Energy's Powerwall value proposition depends on electricity price
-volatility. States with high prices = best Powerwall markets. This pipeline
+volatility. States with high prices equals best Powerwall markets. This pipeline
 tracks exactly that — automatically, every month.
 
 ## Key Findings (March 2026)
